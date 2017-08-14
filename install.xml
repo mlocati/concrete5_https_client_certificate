@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<concrete5-cif version="1.0">
+    <jobs>
+        <job handle="update_https_client_certificate" package="https_client_certificate" />
+    </jobs>
+</concrete5-cif>
