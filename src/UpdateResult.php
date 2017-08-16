@@ -1,7 +1,7 @@
 <?php
-
 namespace HttpsClientCertificate;
 
+use Concrete\Core\Support\Facade\Application;
 use DateTime;
 
 class UpdateResult
@@ -19,6 +19,13 @@ class UpdateResult
      * @var string
      */
     protected $filename;
+
+    /**
+     * Current file date/time.
+     *
+     * @var DateTime|null
+     */
+    protected $currentDate;
 
     /**
      * Date/time when the file will be updated.
@@ -48,6 +55,16 @@ class UpdateResult
     }
 
     /**
+     * Get the current file date/time.
+     *
+     * @return DateTime|null
+     */
+    public function getCurrentDate()
+    {
+        return $this->currentDate;
+    }
+
+    /**
      * Date/time when the file will be updated (if it's already up-to-date).
      *
      * @return DateTime|null
@@ -64,6 +81,7 @@ class UpdateResult
     {
         $this->updated = false;
         $this->shownFilename = '';
+        $this->currentDate = null;
         $this->nextUpdate = null;
     }
 
@@ -74,11 +92,12 @@ class UpdateResult
      *
      * @return static
      */
-    public static function updated($filename, DateTime $nextUpdate)
+    public static function updated($filename, DateTime $nextUpdate, DateTime $currentDate = null)
     {
         $result = new static();
         $result->updated = true;
         $result->filename = $filename;
+        $result->currentDate = $currentDate;
         $result->nextUpdate = $nextUpdate;
 
         return $result;
@@ -92,11 +111,44 @@ class UpdateResult
      *
      * @return static
      */
-    public static function alreadyUpToDate($filename, DateTime $nextUpdate)
+    public static function alreadyUpToDate($filename, DateTime $currentDate, DateTime $nextUpdate)
     {
         $result = new static();
         $result->filename = $filename;
+        $result->currentDate = $currentDate;
         $result->nextUpdate = $nextUpdate;
+
+        return $result;
+    }
+
+    /**
+     * Returns a string representation of this instance.
+     */
+    public function __toString()
+    {
+        $app = Application::getFacadeApplication();
+        $dateHelper = $app->make('date');
+        if ($this->isUpdated()) {
+            $result = t('The HTTPS Client certificate has been updated.');
+            $dt = $this->getCurrentDate();
+            if ($dt !== null) {
+                $result .= "\n" . t('The file has been previously created on %s', $dateHelper->formatDateTime($dt, true, true));
+            }
+            $dt = $this->getNextUpdate();
+            if ($dt !== null) {
+                $result .= "\n" . t('The file will be updated again after %s', $dateHelper->formatDateTime($dt, true, true));
+            }
+        } else {
+            $result = t('The HTTPS Client certificate is already up-to-date.');
+            $dt = $this->getCurrentDate();
+            if ($dt !== null) {
+                $result .= "\n" . t('The file was created on %s', $dateHelper->formatDateTime($dt, true, true));
+            }
+            $dt = $this->getNextUpdate();
+            if ($dt !== null) {
+                $result .= "\n" . t('The file will be updated after %s', $dateHelper->formatDateTime($dt, true, true));
+            }
+        }
 
         return $result;
     }

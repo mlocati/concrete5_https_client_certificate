@@ -1,10 +1,11 @@
 <?php
-
 namespace Concrete\Package\HttpsClientCertificate;
 
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Package\Package;
 use HttpsClientCertificate\Console\Command\UpdateHttpClientCertificateCommand;
+use HttpsClientCertificate\ServiceProvider;
+use HttpsClientCertificate\Updater;
 
 defined('C5_EXECUTE') or die('Access Denied.');
 
@@ -34,6 +35,12 @@ class Controller extends Package
     {
         parent::install();
         $this->installXml();
+        $this->registerServiceProvider();
+        try {
+            $this->app->make(Updater::class)->update();
+        } catch (\Exception $x) {
+        } catch (\Throwable $x) {
+        }
     }
 
     public function upgrade()
@@ -49,7 +56,7 @@ class Controller extends Package
         $config->save('app.http_client.sslcafile', null);
     }
 
-    protected function installXml()
+    private function installXml()
     {
         $contentImporter = $this->app->make(ContentImporter::class);
         echo $this->getPackagePath() . '/install.xml';
@@ -58,12 +65,22 @@ class Controller extends Package
 
     public function on_start()
     {
+        $this->registerServiceProvider();
         if ($this->app->isRunThroughCommandLineInterface()) {
             $this->registerConsoleCommands();
         }
     }
 
-    protected function registerConsoleCommands()
+    /**
+     * Register the service classes.
+     */
+    private function registerServiceProvider()
+    {
+        $provider = $this->app->make(ServiceProvider::class);
+        $provider->register();
+    }
+
+    private function registerConsoleCommands()
     {
         $console = $this->app->make('console');
         $console->add(new UpdateHttpClientCertificateCommand());

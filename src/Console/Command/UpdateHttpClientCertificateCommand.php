@@ -1,5 +1,4 @@
 <?php
-
 namespace HttpsClientCertificate\Console\Command;
 
 use Concrete\Core\Console\Command;
@@ -53,7 +52,9 @@ EOT
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $app = Application::getFacadeApplication();
-        $options = [];
+        $options = [
+            'persistOptions' => true,
+        ];
         $o = $input->getOption('max-age');
         if ($o !== null) {
             $options['maxAge'] = $o;
@@ -68,17 +69,9 @@ EOT
             $output->write('Updating the HTTPS client certificate file... ');
         }
         $updateResult = $updater->update($options, $force);
-        /* @var \HttpsClientCertificate\UpdateResult $updateResult */
-        $text = $updateResult->isUpdated() ?
-            t('The HTTPS Client certificate has been updated.')
-            :
-            t('The HTTPS Client certificate is already up-to-date.')
-        ;
-        $dt = $updateResult->getNextUpdate();
-        if ($dt !== null) {
-            $text .= "\n" . t(/*i18n: %s is a date/time*/'The file will be updated on %s', $app->make('date')->formatDateTime($dt, true, true));
+        if ($output->getVerbosity() >= OutputInterface::VERBOSITY_NORMAL) {
+            $output->writeln((string) $updateResult);
         }
-        $output->writeln($text);
 
         return 0;
     }

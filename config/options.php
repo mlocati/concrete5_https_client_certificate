@@ -1,8 +1,11 @@
 <?php
 
 return [
-    'remoteFileSecure' => 'https://curl.haxx.se/ca/cacert.pem',
-    'remoteFile' => 'http://curl.haxx.se/ca/cacert.pem',
+    'remoteFileUri' => [
+        'https' => 'https://curl.haxx.se/ca/cacert.pem',
+        'http' => 'http://curl.haxx.se/ca/cacert.pem',
+    ],
+    'remoteProtocol' => '*',
     'path' => '<APPLICATION>/files/cacert.pem',
-    'maxAge' => 2592000, // 30 days
+    'maxAge' => 1296000, // 15 days
 ];
