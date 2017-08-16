@@ -15,7 +15,7 @@ class Controller extends Package
 
     protected $appVersionRequired = '8.2.0';
 
-    protected $pkgVersion = '0.8.0';
+    protected $pkgVersion = '0.9.0';
 
     protected $pkgAutoloaderRegistries = [
         'src' => 'HttpsClientCertificate',
@@ -23,7 +23,7 @@ class Controller extends Package
 
     public function getPackageName()
     {
-        return t('HTTPS Client Certificate');
+        return t('HTTPS Client Certificate validation');
     }
 
     public function getPackageDescription()
